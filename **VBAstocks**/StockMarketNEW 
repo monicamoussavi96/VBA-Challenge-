@@ -1,0 +1,79 @@
+'Total Stock Volume
+Sub TotalStockVol():
+
+ 'loop through all of the worksheets
+ For Each ws In Worksheets
+
+ 'set variables
+ Dim i, j As Long
+ Dim totalvolume As Double
+ Dim ticker As String
+ Dim lastrow As Long
+ Dim yearlychange As Double
+ Dim pricechange As Double
+ Dim openprice As Double
+ Dim closeprice As Double
+ Dim openprice_row As Long
+
+ 'headers
+ ws.Range("I1").Value = "Ticker"
+ ws.Range("J1").Value = "Yearly Change"
+ ws.Range("K1").Value = "Percent Change"
+ ws.Range("L1").Value = "Total Stock Value"
+
+ 'set initial total
+ totalvol = 0
+ j = 2
+ openprice_row = 2
+
+ 'find last row
+ lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+
+ 'loop through every year of data
+ For i = 2 To lastrow
+     
+     'compare the tickers
+     If ws.Range("A" & i + 1).Value = ws.Range("A" & i).Value Then
+
+         'calculate the total volume for each ticker if same
+         totalvol = totalvol + ws.Range("G" & i).Value
+
+     Else
+         'grab ticker when its changes
+         ticker = ws.Range("A" & i).Value
+
+         'calculate the yearly and percent change
+         openprice = ws.Range("C" & openprice_row)
+         closeprice = ws.Range("F" & i)
+         yearlychange = closeprice - openprice
+
+         'calculate the change in percentage
+         If openprice = 0 Then
+            pricechange = 0
+         Else
+            pricechange = yearlychange / openprice
+         End If
+
+         'insert ticker, total volume, yearly change, and percent change into cells
+         ws.Range("I" & j).Value = ticker
+         ws.Range("L" & j).Value = totalvol + ws.Range("G" & i).Value
+         ws.Range("J" & j).Value = yearlychange
+         ws.Range("K" & j).Value = pricechange
+         ws.Range("K" & j).NumberFormat = "0.00%"
+         
+         'conditional formating for percentage change, green is pos and red is neg
+         If ws.Range("J" & j).Value > 0 Then
+            ws.Range("J" & j).Interior.ColorIndex = 4
+         Else
+            ws.Range("J" & j).Interior.ColorIndex = 3
+         End If
+
+         'Add a new row into cells for next ticker and set a new open row and reset the total
+         j = j + 1
+         totalvol = 0
+         openprice_row = i + 1
+         
+     End If
+ Next i
+ Next ws
+End Sub
